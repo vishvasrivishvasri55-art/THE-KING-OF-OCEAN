@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishing Master - Beach Fishing Adventure</title>
+    <meta name="description" content="A highly polished 2D fishing game. Upgrade equipment, catch 50+ unique species, and travel to exotic locations.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- TOP HUD STATUS BAR -->
+        <header>
+            <div class="hud-left">
+                <div class="hud-item">
+                    <span>👑 Level</span>
+                    <span id="hud-level">1</span>
+                </div>
+                <div class="xp-bar-container">
+                    <span class="xp-label">XP:</span>
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="hud-xp-fill"></div>
+                    </div>
+                    <span id="hud-xp-text">0/100 XP</span>
+                </div>
+                <div class="hud-item">
+                    <span class="coin-icon">💰</span>
+                    <span id="hud-coins">100</span>
+                </div>
+            </div>
+            
+            <div class="hud-right">
+                <div class="status-badge" id="hud-location">Beach Shore</div>
+                <div class="status-badge" id="hud-weather">SUNNY</div>
+                <div class="status-badge" id="username-display">VISHVA SRI</div>
+                <button id="logout-btn" style="display:none;">Logout</button>
+                <button id="profile-btn">Account</button>
+            </div>
+        </header>
+
+        <!-- MAIN ARENA SCREEN -->
+        <main id="main-frame">
+            <!-- FLOATING HUD PANEL SWITCHERS -->
+            <div class="floating-hud-controls">
+                <button class="tab-btn" data-tab="collection" title="Collection Book" id="btn-collection">📖</button>
+                <button class="tab-btn" data-tab="locations" title="Fishing Locations" id="btn-locations">🗺️</button>
+                <button class="tab-btn" data-tab="shop" title="Upgrade Gear" id="btn-shop">🛒</button>
+                <button class="tab-btn" data-tab="quests" title="Quests & Rewards" id="btn-quests">📜</button>
+                <button class="tab-btn" data-tab="achievements" title="Achievements" id="btn-achievements">🏆</button>
+                <button class="tab-btn" data-tab="spin" title="Lucky Spin Wheel" id="btn-spin">🎡</button>
+                <button class="tab-btn" data-tab="leaderboard" title="Leaderboards" id="btn-leaderboard">📊</button>
+            </div>
+
+            <!-- THE CANVAS ELEMENT -->
+            <div id="canvas-stage">
+                <canvas id="game-canvas" width="900" height="500"></canvas>
+                
+                <!-- GOLD RUSH HUD ICON OVERLAY -->
+                <div id="gold-rush-overlay">
+                    <span>⚡ GOLDEN FISH RUSH:</span>
+                    <span id="gold-rush-timer-txt">60s</span>
+                </div>
+
+                <!-- DRAGGABLE REEL WHEEL COMPONENT -->
+                <div class="reel-wheel-widget">
+                    <div class="reel-wheel-outer" id="reel-wheel-element">
+                        <div class="reel-spokes"></div>
+                        <div class="reel-spokes v"></div>
+                        <div class="reel-handle"></div>
+                    </div>
+                    <div class="wheel-label">REEL SPIN</div>
+                </div>
+            </div>
+
+            <!-- TABS SLIDE-IN GLASS PANELS -->
+            <!-- 1. Collection panel -->
+            <div class="side-panel" id="collection-panel">
+                <div class="panel-header">
+                    <h3>Fish Encyclopedia</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="collection-header-stat" id="collection-progress-text">Unlocked: 0 / 52</div>
+                <div class="panel-content" id="collection-container">
+                    <!-- Fish encyclopedia grid cards go here -->
+                </div>
+            </div>
+
+            <!-- 2. Locations panel -->
+            <div class="side-panel" id="locations-panel">
+                <div class="panel-header">
+                    <h3>Travel Locations</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="panel-content locations-list" id="locations-container">
+                    <!-- Locations unlock cards go here -->
+                </div>
+            </div>
+
+            <!-- 3. Shop panel -->
+            <div class="side-panel" id="shop-panel">
+                <div class="panel-header">
+                    <h3>Equipment Shop</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="panel-content" id="upgrades-container">
+                    <!-- Upgrade listings -->
+                </div>
+            </div>
+
+            <!-- 4. Quests panel -->
+            <div class="side-panel" id="quests-panel">
+                <div class="panel-header">
+                    <h3>Daily Rewards & Quests</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="panel-content">
+                    <div class="daily-bonus-section">
+                        <h4>Daily Login Bonus</h4>
+                        <div class="daily-grid" id="daily-streak-days">
+                            <!-- day reward slots -->
+                        </div>
+                        <button id="claim-daily-btn">Claim Reward</button>
+                    </div>
+                    <h4>Active Quests</h4>
+                    <div class="quests-list" id="quests-container" style="margin-top: 10px;">
+                        <!-- Quests tracker -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Achievements panel -->
+            <div class="side-panel" id="achievements-panel">
+                <div class="panel-header">
+                    <h3>Trophy Achievements</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="panel-content achievements-list" id="achievements-container">
+                    <!-- Trophy list -->
+                </div>
+            </div>
+
+            <!-- 6. Spin wheel panel -->
+            <div class="side-panel" id="spin-panel">
+                <div class="panel-header">
+                    <h3>Lucky Spin Wheel</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="panel-content lucky-spin-container">
+                    <p class="wheel-desc" style="font-size: 0.85rem; text-align: center; color: var(--text-muted);">
+                        Cost: 50 Coins. Get rare baits, coins, and long golden rush durations!
+                    </p>
+                    <div class="wheel-frame">
+                        <div class="wheel-pointer"></div>
+                        <div class="wheel-graphic" id="wheel-spinner-graphic"></div>
+                    </div>
+                    <button id="spin-btn">SPIN WHEEL</button>
+                </div>
+            </div>
+
+            <!-- 7. Leaderboards panel -->
+            <div class="side-panel" id="leaderboard-panel">
+                <div class="panel-header">
+                    <h3>Global Tournament</h3>
+                    <button class="close-panel-btn">&times;</button>
+                </div>
+                <div class="panel-content table-panel-content">
+                    <h4 style="color: var(--gold); margin-bottom: 6px;" id="tourney-name">Summer Beach Classic</h4>
+                    <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">Ends in: <span id="tourney-timer" style="color: #fff; font-weight: 700;">-</span></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Fisherman</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tourney-tbody">
+                            <!-- Tourney list -->
+                        </tbody>
+                    </table>
+                    
+                    <h4 style="color: var(--neon-cyan); margin-top: 20px; margin-bottom: 8px;">Top Levels Leaderboard</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Fisherman</th>
+                                <th>Level</th>
+                                <th>Coins</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody">
+                            <!-- Leaderboard list -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- ACTION INPUT PANEL (FOOTER) -->
+        <footer>
+            <div class="footer-left">
+                <span id="action-prompt">Hold button or Spacebar to cast rod.</span>
+                <div class="hud-bars">
+                    <!-- Tension bar -->
+                    <div class="hud-meter-container" id="tension-bar-container">
+                        <span>Line Tension Warning</span>
+                        <div class="bar-fill" id="tension-fill"></div>
+                    </div>
+                    <!-- Catch progress bar -->
+                    <div class="hud-meter-container" id="catch-bar-container">
+                        <span>Reel Catching Distance Progress</span>
+                        <div class="bar-fill" id="catch-fill"></div>
+                    </div>
+                    <!-- Cast Power progress bar -->
+                    <div class="hud-meter-container" id="power-bar" style="display: block;">
+                        <span>Casting Line Strength</span>
+                        <div class="bar-fill" id="power-fill"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-right">
+                <button id="cancel-cast-btn">Reel Back</button>
+                <button id="cast-reel-btn" class="game-btn cast-mode">Hold to Cast</button>
+            </div>
+        </footer>
+
+        <!-- NOTIFICATION CONTAINER OVERLAYS -->
+        <div id="notification-overlay"></div>
+
+        <!-- 1. CATCH CELEBRATION MODAL -->
+        <div class="modal-overlay" id="catch-modal">
+            <div class="modal-card">
+                <div class="levelup-flash" id="levelup-banner">LEVEL UP!</div>
+                <h3 id="catch-modal-title">Fish Caught!</h3>
+                <h2 id="catch-name">Golden Blue Marlin</h2>
+                <div id="catch-rarity" class="rarity-badge common">COMMON</div>
+                
+                <div class="catch-circle" id="catch-display-circle">
+                    <div class="circle-fish-eye"></div>
+                </div>
+
+                <div class="stat-grid-caught">
+                    <div>
+                        <div class="stat-box-lbl">Weight</div>
+                        <div class="stat-box-val"><span id="catch-weight">1.45</span> kg</div>
+                    </div>
+                    <div>
+                        <div class="stat-box-lbl">Length</div>
+                        <div class="stat-box-val"><span id="catch-length">35.2</span> cm</div>
+                    </div>
+                </div>
+
+                <div class="reward-banner-row">
+                    <div class="reward-cell coins">
+                        <span>💰</span>
+                        <span id="reward-coins">+25</span>
+                    </div>
+                    <div class="reward-cell xp">
+                        <span>⚡</span>
+                        <span id="reward-xp">+15 XP</span>
+                    </div>
+                </div>
+
+                <button id="claim-catch-btn">Add to Collection</button>
+            </div>
+        </div>
+
+        <!-- 2. LOGIN AUTH SETTINGS MODAL -->
+        <div class="modal-overlay" id="auth-modal">
+            <div class="modal-card">
+                <h3 style="color: var(--neon-cyan); margin-bottom: 15px;">Fisherman Accounts</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+                    Register or log in to sync your local scores, achievements, upgrades, and collection with the global leaderboard.
+                </p>
+                <form id="auth-form">
+                    <div class="form-grp">
+                        <label for="auth-user">Username</label>
+                        <input type="text" id="auth-user" minlength="3" maxlength="15" required placeholder="Fisherman Name">
+                    </div>
+                    <div class="form-grp">
+                        <label for="auth-pass">Password</label>
+                        <input type="password" id="auth-pass" minlength="4" required placeholder="Secure Password">
+                    </div>
+                    <div class="auth-actions-row">
+                        <button type="submit" name="action" value="login" class="form-btn login-action-btn">Log In</button>
+                        <button type="submit" name="action" value="register" class="form-btn register-action-btn">Register</button>
+                    </div>
+                </form>
+                <button id="close-auth-btn" style="width: 100%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; margin-top: 15px; font-size: 0.85rem;">Play as Guest</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CODE SCRIPT LOADING -->
+    <script src="js/data.js"></script>
+    <script src="js/sounds.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    
+    <script>
+        // BOOTSTRAP INITIALIZATION ON PAGE LOAD
+        window.addEventListener('load', () => {
+            const canvasEngine = new GameCanvas('game-canvas');
+            const game = new FishingGameController();
+            const ui = new GameUIManager(game);
+            
+            // Connect controller callback events to update DOM structures
+            game.init(canvasEngine, (action, data) => {
+                if (action === 'update_hud') {
+                    ui.updateHUD(data);
+                } else if (action === 'show_catch_modal') {
+                    ui.showCatchModal(data);
+                } else if (action === 'notify') {
+                    ui.showNotification(data);
+                }
+            });
+            
+            ui.init();
+            
+            // Core frame update tick
+            let lastTime = performance.now();
+            function loop(time) {
+                let dt = time - lastTime;
+                if (dt > 100) dt = 100; // Cap to prevent game acceleration issues
+                lastTime = time;
+                
+                game.update(dt);
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+            
+            // Scale and resize bindings
+            const container = document.getElementById('canvas-stage');
+            const resize = () => canvasEngine.resize(container);
+            window.addEventListener('resize', resize);
+            
+            // Perform initial dimensions check
+            resize();
+        });
+    </script>
+</body>
+</html>
